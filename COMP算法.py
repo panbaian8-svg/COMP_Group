@@ -1,51 +1,38 @@
 
 
-class Order:
-    def __init__(self, order_id):
-        self.__order_id = order_id  
-        self.__items = []           
-        self.__is_paid = False
-
-    def add_item(self, dish):
-        if dish.inventory > 0:
-            if dish.reduce_inventory(1):
-                self.__items.append(dish)
-                return True
-        return False
-
-    def suggest_alternative(self, dish_name, menu_dict):
-       
+def radix_sort(prices):
+    """
     
-        recommendation_map = {
-            "burger": "chicken_burger",
-            "cola": "lemon_tea",
-            "fries": "onion_rings"
-        }
+    """
+    if not prices:
+        return []
         
-        alt_name = recommendation_map.get(dish_name.lower())
-        if alt_name and alt_name in menu_dict:
-            alt_dish = menu_dict[alt_name]
-            if alt_dish.inventory > 0:
-                return alt_dish
-        return None
-
-    def calculate_total(self):
-   
-        total = sum(item.get_price() for item in self.__items)
-        return round(total, 2)
-
-    def get_receipt(self):
+    nums = [int(p * 100) for p in prices]
+    max_num = max(nums)
+    
+    exp = 1  
+    while max_num // exp > 0:
         
-        if not self.__items:
-            return "Order is empty."
+        buckets = [[] for _ in range(10)]
         
-        receipt = f"\n--- Receipt (ID: {self.__order_id}) ---\n"
-        for item in self.__items:
-            receipt += f"{item.name:15} | ${item.get_price():>6.2f}\n"
-        receipt += "-" * 30
-        receipt += f"\nTotal Amount:   ${self.calculate_total():>6.2f}\n"
-        return receipt
+        
+        for num in nums:
+            index = (num // exp) % 10
+            buckets[index].append(num)
+        
+        
+        nums = []
+        for bucket in buckets:
+            nums.extend(bucket)
+            
+        exp *= 10  # 进到下一位
+        
+    
+    return [n / 100 for n in nums]
 
-    @property
-    def order_id(self):
-        return self.__order_id
+
+if __name__ == "__main__":
+    test_prices = [12.5, 5.0, 9.99, 25.0, 3.5]
+    sorted_p = radix_sort(test_prices)
+    print(f"Original Prices: {test_prices}")
+    print(f"Sorted Prices:   {sorted_p}")
