@@ -1,119 +1,53 @@
-# ==============================================
-# Cafeteria Ordering System - Main Program
-# ==============================================
+from dish import MainDish, Drink, DishPairingGraph
+from order import Order
+from algorithms import radix_sort_prices
 
-# Dynamic fix: Order class calls get_price(), but Dish class provides get_final_price()
-# Without modifying original classes, unify interface via monkey patching
-Dish.get_price = Dish.get_final_price
+class RestaurantSystem:
+    def __init__(self):
+        # Initialize menu with default items
+        self.menu = {
+            "Beef Burger": MainDish("Beef Burger", 12.99, 10),
+            "Cola": Drink("Cola", 3.00, 50)
+        }
+        # Initialize pairings using the Graph structure
+        self.pairings = DishPairingGraph()
+        self.pairings.add_pairing("Beef Burger", "Cola")
 
+    def run(self):
+        """Starts the interactive CLI system"""
+        print("HKMU Restaurant System v1.0")
+        current_order = Order("TXN001")
+        
+        while True:
+            print("\n1. Menu (Sorted) | 2. Order | 3. Checkout | 4. Exit")
+            cmd = input("Choice: ")
+            
+            if cmd == "1":
+                # Extract and sort prices using Member 2's algorithm
+                prices = [d.get_final_price() for d in self.menu.values()]
+                sorted_p = radix_sort_prices(prices)
+                print(f"Current Prices: {sorted_p}")
+                for d in self.menu.values(): 
+                    print(d.describe())
+                
+            elif cmd == "2":
+                # Handle ordering and display Member 1's graph-based recommendations
+                name = input("Dish name: ")
+                if name in self.menu and current_order.add_item(self.menu[name]):
+                    print(f"Added {name}!")
+                    recs = self.pairings.get_recommendations(name)
+                    if recs: 
+                        print(f"Suggested with this: {recs}")
+                else: 
+                    print("Error: Out of stock or not found.")
 
-def main():
-    # Initialize dish manager
-    manager = DishManager()
-    
-    # Add 6 dishes (main courses and beverages)
-    dishes = [
-        MainDish("Beef Burger", 12.99, 10),
-        MainDish("Chicken Burger", 10.99, 8),
-        MainDish("French Fries", 5.99, 15),
-        Drink("Cola", 3.99, 20),
-        Drink("Lemon Tea", 4.99, 12),
-        Drink("Coffee", 5.49, 10)
-    ]
-    
-    for dish in dishes:
-        manager.add_dish(dish)
-    
-    # Set dish pairing relationships
-    manager.set_pairing("Beef Burger", "Cola")
-    manager.set_pairing("Beef Burger", "French Fries")
-    manager.set_pairing("Chicken Burger", "Lemon Tea")
-    manager.set_pairing("French Fries", "Coffee")
-    manager.set_pairing("Cola", "French Fries")
-    
-    # Create order
-    order = Order("ORD001")
-    
-    # Main loop: interactive menu
-    while True:
-        print("\n" + "=" * 35)
-        print("   Cafeteria Ordering System")
-        print("=" * 35)
-        print("1. Display Full Menu")
-        print("2. Order Dish")
-        print("3. View Recommendations")
-        print("4. View Current Order")
-        print("5. Checkout & Print Receipt")
-        print("6. Exit")
-        print("-" * 35)
-        
-        choice = input("Please select operation (1-6): ").strip()
-        
-        if choice == "1":
-            # Display full menu
-            print("\n--- Menu List ---")
-            for dish in manager.menu.values():
-                print(dish.describe())
-        
-        elif choice == "2":
-            # Order dish
-            dish_name = input("Please enter dish name: ").strip()
-            if dish_name in manager.menu:
-                dish = manager.menu[dish_name]
-                if order.add_item(dish):
-                    print(f"[OK] Successfully added: {dish_name}")
-                else:
-                    # Out of stock, suggest alternative
-                    alt = order.suggest_alternative(dish_name, manager.menu)
-                    if alt:
-                        print(f"[!] {dish_name} out of stock, recommended alternative: {alt.name}")
-                        confirm = input("Choose alternative dish? (y/n): ").strip().lower()
-                        if confirm == 'y':
-                            if order.add_item(alt):
-                                print(f"[OK] Successfully added alternative: {alt.name}")
-                            else:
-                                print(f"[X] Failed to add alternative")
-                    else:
-                        print(f"[X] {dish_name} out of stock, no alternative available")
-            else:
-                print(f"[X] Dish '{dish_name}' does not exist")
-        
-        elif choice == "3":
-            # View recommendations
-            dish_name = input("Please enter dish name: ").strip()
-            if dish_name in manager.menu:
-                recommendations = manager.get_recommended_dishes(dish_name)
-                if recommendations:
-                    print(f"\nPairings for '{dish_name}':")
-                    for dish in recommendations:
-                        print(f"  - {dish.name} (${dish.get_final_price():.2f})")
-                else:
-                    print(f"[!] '{dish_name}' has no recommendations")
-            else:
-                print(f"[X] Dish '{dish_name}' does not exist")
-        
-        elif choice == "4":
-            # View current order
-            print(order.get_receipt())
-        
-        elif choice == "5":
-            # Checkout and print receipt
-            print(order.get_receipt())
-            confirm = input("Confirm payment? (y/n): ").strip().lower()
-            if confirm == 'y':
-                print("[OK] Payment successful! Thank you for visiting!")
+            elif cmd == "3":
+                # Finalize order and print receipt
+                print(current_order.generate_receipt())
                 break
-            else:
-                print("[!] Payment cancelled")
-        
-        elif choice == "6":
-            # Exit
-            print("Thank you for using, goodbye!")
-            break
-        
-        else:
-            print("[X] Invalid selection, please try again")
-
+                
+            elif cmd == "4": 
+                break
 
 if __name__ == "__main__":
-    main()
+    RestaurantSystem().run()
