@@ -1,0 +1,28 @@
+# Task 1 - Cafeteria Ordering System
+
+A Python OOP application for restaurant menu management and order processing.
+
+## How to Run
+
+```bash
+python main.py
+  
+  Or test individual modules:
+
+python dish.py      # Test dish classes and graph
+python order.py     # Test order functionality
+
+Core Features
+• Menu Management - Add dishes with category, price, inventory
+• Order Processing - Add items, calculate total, print receipt
+• Inventory Control - Auto-decrement stock, out-of-stock detection
+• Dish Recommendations - Graph-based pairing suggestions
+
+  
+OOP Concepts Used
+Concept         Implementation
+Abstraction    `AbstractDish` base class with abstract methods
+Encapsulation   Private `__inventory`, controlled access via methods
+Inheritance    `MainDish` and `Drink` extend `Dish`
+Polymorphism   `get_final_price()` overridden in subclasses
+
