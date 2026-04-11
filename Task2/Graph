@@ -1,0 +1,45 @@
+class Graph:
+    def __init__(self):
+        self._adj = {}  # Adjacency list
+    
+    def add_vertex(self, v: str) -> None:
+        """Add a vertex if not exists"""
+        if v not in self._adj:
+            self._adj[v] = []
+    
+    def add_edge(self, v1: str, v2: str) -> bool:
+        """Add undirected edge between two vertices"""
+        if v1 not in self._adj or v2 not in self._adj:
+            return False
+        if v2 not in self._adj[v1]:
+            self._adj[v1].append(v2)
+        if v1 not in self._adj[v2]:
+            self._adj[v2].append(v1)
+        return True
+    
+    def get_neighbors(self, v: str) -> list:
+        """Get all adjacent vertices"""
+        return self._adj.get(v, []).copy()
+    
+    def vertex_count(self) -> int:
+        return len(self._adj)
+    
+    def edge_count(self) -> int:
+        return sum(len(n) for n in self._adj.values()) // 2
+
+
+# Demo
+if __name__ == "__main__":
+    g = Graph()
+    
+    # Add dishes
+    for dish in ["Burger", "Fries", "Cola"]:
+        g.add_vertex(dish)
+    
+    # Add pairings
+    g.add_edge("Burger", "Fries")
+    g.add_edge("Burger", "Cola")
+    
+    # Test
+    print(f"Vertices: {g.vertex_count()}")
+    print(f"Burger pairs with: {g.get_neighbors('Burger')}")
